@@ -1,0 +1,83 @@
+:root {
+  --background: #0d0b09;
+  --surface: #15100d;
+  --heading: #fff4e6;
+  --text: #e7cfb8;
+  --muted: #ba9c82;
+  --accent: #ff9b54;
+  --accent-soft: #ffc88b;
+  --display: 'Space Grotesk', 'Segoe UI', sans-serif;
+  --sans: 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
+  --mono: 'IBM Plex Mono', Consolas, monospace;
+
+  font-family: var(--sans);
+  line-height: 1.55;
+  font-weight: 400;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 20% 10%, rgba(255, 146, 77, 0.22), transparent 22%),
+    radial-gradient(circle at 80% 18%, rgba(88, 149, 255, 0.16), transparent 20%),
+    radial-gradient(circle at 50% 100%, rgba(255, 213, 158, 0.1), transparent 22%),
+    linear-gradient(180deg, #120f0c 0%, #0a0908 100%);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+#root {
+  width: min(1240px, calc(100% - 1.5rem));
+  margin: 0 auto;
+  padding: 1rem 0 2.5rem;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--display);
+  line-height: 0.96;
+  color: var(--heading);
+}
+
+h1 {
+  font-size: clamp(3.3rem, 7vw, 6.5rem);
+  letter-spacing: -0.08em;
+}
+
+h2 {
+  font-size: clamp(1.9rem, 3.4vw, 3rem);
+  letter-spacing: -0.06em;
+}
+
+h3 {
+  font-size: 1.18rem;
+  letter-spacing: -0.03em;
+}
+
+p,
+li {
+  font-size: 1rem;
+}
