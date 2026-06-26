@@ -9,112 +9,353 @@ import {
 import { GoogleGenAI } from '@google/genai'
 import './App.css'
 
-const officialLinks = [
-  {
-    label: 'Vibe2Ship Event Page',
-    href: 'https://blockseblock.com/hackathon_details/Vibe2Ship',
-  },
-  {
-    label: 'Coding Ninjas Landing Page',
-    href: 'https://www.codingninjas.com/landing/10x-vibe2ship/',
-  },
-  {
-    label: 'Guidelines Doc',
-    href: 'https://docs.google.com/document/d/1tRlULMcNthm3wAVd2MKEwosv44BqvRXIil4e359_5BM/edit?tab=t.6awy00z9xq1f',
-  },
+const energyOptions = [
+  { value: 'low', label: 'Low Energy' },
+  { value: 'medium', label: 'Normal Energy' },
+  { value: 'high', label: 'High Energy' },
+]
+
+const rescueWindows = [
+  { value: '24', label: 'Next 24 hours' },
+  { value: '72', label: 'Next 3 days' },
+  { value: '168', label: 'Next 7 days' },
 ]
 
 const initialForm = {
-  name: 'Aniket',
-  goal: 'Build a solo AI-powered student productivity assistant for the Vibe2Ship hackathon.',
-  hours: '5',
-  deadline: 'June 29, 2026, 2:00 PM IST',
-  challenges:
-    'Task planning, clear next steps, study prioritization, and keeping the project small enough to finish on time.',
+  studentName: 'Aniket',
+  goal: 'Recover from deadline overload and stop missing important academic work.',
+  availableHours: '5',
+  rescueWindow: '72',
+  energy: 'medium',
+  notes: 'I want a realistic rescue plan, clear priorities, and what to do first today.',
 }
 
-const demoFrames = [
+const initialTasks = [
   {
-    label: 'Frame 01',
-    title: 'Problem Setup',
-    detail: 'Open with an overloaded student schedule and frame the product as clarity-first, not feature-first.',
+    id: 'task-1',
+    title: 'DBMS assignment submission',
+    dueInHours: '18',
+    effortHours: '3',
+    importance: '5',
   },
   {
-    label: 'Frame 02',
-    title: 'AI Planning Moment',
-    detail: 'Enter the goal, time available, and blockers, then generate the study plan live with Gemini or demo mode.',
+    id: 'task-2',
+    title: 'Prepare for DSA test',
+    dueInHours: '42',
+    effortHours: '4',
+    importance: '5',
   },
   {
-    label: 'Frame 03',
-    title: 'Usable Output',
-    detail: 'Show the cleaned result cards, today tasks, prompt pack, and polished interface in one flow.',
+    id: 'task-3',
+    title: 'React component practice',
+    dueInHours: '60',
+    effortHours: '2',
+    importance: '3',
+  },
+  {
+    id: 'task-4',
+    title: 'Hackathon landing page polish',
+    dueInHours: '30',
+    effortHours: '3',
+    importance: '4',
   },
 ]
 
-const demoScript = [
-  'Students do not need another cluttered dashboard; they need a clear next move.',
-  'Smart Student Copilot turns one messy academic goal into a focused plan with priorities, milestones, and daily action.',
-  'The product stays intentionally small so a solo builder can ship polish, explain the value fast, and finish on time.',
+const scenarioPresets = [
+  {
+    label: 'Exam Week',
+    form: {
+      goal: 'Survive exam week without missing submissions or revision targets.',
+      availableHours: '6',
+      rescueWindow: '72',
+      energy: 'medium',
+      notes: 'I need a rescue plan that balances revision, assignments, and fast recovery.',
+    },
+    tasks: [
+      {
+        id: 'exam-1',
+        title: 'Computer Networks revision',
+        dueInHours: '26',
+        effortHours: '4',
+        importance: '5',
+      },
+      {
+        id: 'exam-2',
+        title: 'OS lab file completion',
+        dueInHours: '20',
+        effortHours: '2',
+        importance: '4',
+      },
+      {
+        id: 'exam-3',
+        title: 'DSA mock test',
+        dueInHours: '48',
+        effortHours: '3',
+        importance: '5',
+      },
+      {
+        id: 'exam-4',
+        title: 'Resume update for internship form',
+        dueInHours: '60',
+        effortHours: '1',
+        importance: '3',
+      },
+    ],
+  },
+  {
+    label: 'Submission Crunch',
+    form: {
+      goal: 'Rescue a packed deadline week and avoid last-day collapse.',
+      availableHours: '4',
+      rescueWindow: '24',
+      energy: 'low',
+      notes: 'I have little time, low energy, and I need the fastest safe rescue strategy.',
+    },
+    tasks: [
+      {
+        id: 'crunch-1',
+        title: 'Finalize hackathon demo flow',
+        dueInHours: '10',
+        effortHours: '3',
+        importance: '5',
+      },
+      {
+        id: 'crunch-2',
+        title: 'Deploy updated build',
+        dueInHours: '8',
+        effortHours: '1',
+        importance: '5',
+      },
+      {
+        id: 'crunch-3',
+        title: 'Write README and project doc',
+        dueInHours: '12',
+        effortHours: '2',
+        importance: '4',
+      },
+      {
+        id: 'crunch-4',
+        title: 'Record 60-second demo video',
+        dueInHours: '18',
+        effortHours: '2',
+        importance: '4',
+      },
+    ],
+  },
 ]
 
-const scrollStages = [
-  { id: 'hero', code: '00', label: 'Surface', detail: 'Product framing and premium first impression.' },
-  { id: 'planner', code: '01', label: 'Input', detail: 'Student goal, time, and blockers enter the system.' },
-  { id: 'systems', code: '02', label: 'Signals', detail: 'Problem, AI core, and judging angle become clear.' },
-  { id: 'story', code: '03', label: 'Narrative', detail: 'Before, AI moment, and after-state stay readable.' },
-  { id: 'execution', code: '04', label: 'Execution', detail: 'Pitch, focus, and why-now stay front and center.' },
-  { id: 'roadmap', code: '05', label: 'Roadmap', detail: 'The build sequence becomes the next action plan.' },
-  { id: 'result', code: '06', label: 'Output', detail: 'The generated experience feels real and shippable.' },
-  { id: 'prompts', code: '07', label: 'Prompts', detail: 'Gemini usage is visible, useful, and reusable.' },
-  { id: 'submission', code: '08', label: 'Submission', detail: 'Screenshots, demo flow, and final pitch line up.' },
-]
+function createTask() {
+  return {
+    id: globalThis.crypto?.randomUUID?.() ?? `task-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    title: '',
+    dueInHours: '24',
+    effortHours: '2',
+    importance: '3',
+  }
+}
 
-function buildFallbackPlan(form) {
-  const hoursNumber = Number(form.hours) || 4
+function parseNumber(value, fallback = 0) {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : fallback
+}
+
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max)
+}
+
+function riskBand(score) {
+  if (score >= 78) return 'High'
+  if (score >= 56) return 'Medium'
+  return 'Low'
+}
+
+function urgencyLabel(hours) {
+  if (hours <= 12) return 'Immediate'
+  if (hours <= 24) return 'Today'
+  if (hours <= 48) return 'Very soon'
+  if (hours <= 72) return 'This week'
+  return 'Stable'
+}
+
+function scoreTask(task, availableHours, rescueWindowHours) {
+  const dueInHours = clamp(parseNumber(task.dueInHours, 24), 1, 999)
+  const effortHours = clamp(parseNumber(task.effortHours, 1), 0.5, 24)
+  const importance = clamp(parseNumber(task.importance, 3), 1, 5)
+  const urgencyScore =
+    dueInHours <= 12 ? 42 : dueInHours <= 24 ? 34 : dueInHours <= 48 ? 26 : dueInHours <= 72 ? 18 : 10
+  const importanceScore = importance * 10
+  const effortPressure = clamp(Math.round((effortHours / dueInHours) * 160), 4, 24)
+  const capacityPressure = effortHours > availableHours ? 10 : 0
+  const windowPressure = dueInHours <= rescueWindowHours ? 8 : 2
+  const score = clamp(
+    urgencyScore + importanceScore + effortPressure + capacityPressure + windowPressure,
+    18,
+    98,
+  )
+
+  const why =
+    dueInHours <= effortHours * 3
+      ? 'The effort required is too close to the time remaining.'
+      : importance >= 4
+        ? 'This has strong academic impact and should not slip.'
+        : 'This is still worth doing, but it can wait behind urgent work.'
+
+  const nextStep =
+    dueInHours <= 12
+      ? `Start a focused ${Math.min(90, effortHours * 30)} minute block immediately.`
+      : dueInHours <= 24
+        ? 'Finish the first meaningful chunk today, not later tonight.'
+        : 'Reserve a protected block before smaller tasks eat the schedule.'
 
   return {
-    title: 'Smart Student Copilot',
-    pitch:
-      'An AI-powered study companion that turns academic chaos into clear daily action.',
-    focus:
-      'Ship one clean workflow: students enter a goal or workload, and the app returns a structured study plan with clear priorities and next actions.',
-    whyNow:
-      'This is solo-friendly, easy to demo, and aligned with the hackathon requirement to use Google AI Studio as part of the solution.',
-    roadmap: [
+    ...task,
+    cleanTitle: task.title.trim() || 'Untitled task',
+    dueInHours,
+    effortHours,
+    importance,
+    score,
+    band: riskBand(score),
+    urgency: urgencyLabel(dueInHours),
+    why,
+    nextStep,
+  }
+}
+
+function buildTimeline(priorities, availableHours, energy) {
+  const energyFactor = energy === 'high' ? 1.15 : energy === 'low' ? 0.82 : 1
+  let remainingMinutes = Math.round(availableHours * energyFactor * 60)
+  const blocks = []
+
+  for (const [index, task] of priorities.entries()) {
+    if (remainingMinutes <= 25 || blocks.length === 4) {
+      break
+    }
+
+    const desired = clamp(Math.round(task.effortHours * 45), 35, 95)
+    const duration = clamp(Math.min(desired, remainingMinutes), 30, 95)
+    remainingMinutes -= duration
+
+    blocks.push({
+      block: `Block 0${index + 1}`,
+      duration: `${duration} min`,
+      task: task.cleanTitle,
+      outcome:
+        index === 0
+          ? 'Remove the biggest immediate risk first.'
+          : index === 1
+            ? 'Lock the next deadline before context-switching.'
+            : 'Use this block to prevent tomorrow from becoming panic time.',
+    })
+  }
+
+  if (!blocks.length) {
+    blocks.push({
+      block: 'Block 01',
+      duration: '45 min',
+      task: 'Emergency focus reset',
+      outcome: 'Pick one urgent task and create momentum before anything else.',
+    })
+  }
+
+  return blocks
+}
+
+function buildFallbackPlan(form, tasks) {
+  const activeTasks = tasks.filter((task) => task.title.trim())
+  const safeTasks = activeTasks.length ? activeTasks : initialTasks
+  const availableHours = clamp(parseNumber(form.availableHours, 4), 1, 16)
+  const rescueWindowHours = clamp(parseNumber(form.rescueWindow, 72), 24, 168)
+  const scored = safeTasks
+    .map((task) => scoreTask(task, availableHours, rescueWindowHours))
+    .sort((left, right) => right.score - left.score)
+
+  const totalEffort = scored.reduce((sum, task) => sum + task.effortHours, 0)
+  const energyFactor = form.energy === 'high' ? 1.15 : form.energy === 'low' ? 0.82 : 1
+  const windowCapacity = availableHours * energyFactor * (rescueWindowHours / 24)
+  const overloadIndex = Math.round(clamp((totalEffort / Math.max(windowCapacity, 1)) * 100, 18, 100))
+  const atRiskTasks = scored.filter((task) => task.band !== 'Low')
+  const rescueConfidence = clamp(92 - atRiskTasks.length * 12 - Math.max(0, overloadIndex - 70), 24, 90)
+  const planFocus =
+    overloadIndex >= 86 || rescueWindowHours === 24
+      ? 'Last-minute mode'
+      : atRiskTasks.length >= 2
+        ? 'Recovery mode'
+        : 'Steady mode'
+
+  const priorities = scored.slice(0, 4).map((task) => ({
+    title: task.cleanTitle,
+    score: task.score,
+    risk: task.band,
+    urgency: task.urgency,
+    why: task.why,
+    nextStep: task.nextStep,
+  }))
+
+  const timeline = buildTimeline(scored.slice(0, 4), availableHours, form.energy)
+  const risks = scored.slice(0, 3).map((task) => ({
+    title: task.cleanTitle,
+    severity: task.band,
+    warning:
+      task.band === 'High'
+        ? 'If this slips, the rest of the schedule becomes harder to recover.'
+        : 'This can still become urgent if smaller tasks keep interrupting you.',
+    fix: task.nextStep,
+  }))
+
+  const taskContext = scored
+    .map(
+      (task) =>
+        `${task.cleanTitle}: due in ${task.dueInHours}h, effort ${task.effortHours}h, importance ${task.importance}/5`,
+    )
+    .join('\n')
+
+  return {
+    headline:
+      planFocus === 'Last-minute mode'
+        ? 'You need a rescue plan, not a bigger to-do list.'
+        : 'You can still recover this week if you protect the right work first.',
+    summary: `Smart Student Copilot reframes ${form.goal.toLowerCase()} into a focused recovery workflow: identify the hardest deadline pressure, schedule a realistic first block, and remove low-value context switching.`,
+    rescueMode: planFocus,
+    metrics: [
       {
-        label: 'Launch Surface',
-        items: [
-          'Turn the hero into a believable product story, not a generic project page.',
-          'Keep the planning form and generated result in the first viewport decision flow.',
-          'Use one memorable AI interaction that screenshots well for submission.',
-        ],
+        label: 'Overload Index',
+        value: `${overloadIndex}%`,
+        note: 'Compares planned effort against realistic time capacity.',
       },
       {
-        label: 'Core Build',
-        items: [
-          'Connect Gemini through Google AI Studio with one planning prompt that produces clear, structured output.',
-          'Polish the planner results with cleaner sections, smarter prompts, and better empty states.',
-          'Deploy early and iterate on interface quality instead of chasing extra features.',
-        ],
+        label: 'At-Risk Tasks',
+        value: `${atRiskTasks.length}`,
+        note: 'These need action before they turn into missed deadlines.',
       },
       {
-        label: 'Submission Edge',
-        items: [
-          'Record one crisp walkthrough with a student problem, input, and generated plan.',
-          'Keep the story around productivity, clarity, and approachable AI guidance.',
-          'Spend the final pass on visual polish, mobile behavior, and demo reliability.',
-        ],
+        label: 'Rescue Confidence',
+        value: `${rescueConfidence}%`,
+        note: 'Higher when the plan stays narrow and urgent tasks move first.',
+      },
+      {
+        label: 'Today Capacity',
+        value: `${Math.round(availableHours * energyFactor * 10) / 10}h`,
+        note: 'Adjusted for your current energy so the plan stays believable.',
       },
     ],
-    todayTasks: [
-      `Work in ${hoursNumber}-hour blocks and make the planner flow feel premium before adding new screens.`,
-      'Keep only one AI moment in the MVP: turning a messy student goal into a usable plan.',
-      'Avoid auth, databases, multiplayer, or any integration that slows the first polished submission.',
-      'Prepare one sample workflow that you can confidently show in screenshots and video.',
+    priorities,
+    timeline,
+    risks,
+    coachTips: [
+      'Finish one urgent block before opening new tabs or starting smaller “easy” work.',
+      'Use the second block to reduce tomorrow risk, not to perfect something already good enough.',
+      'If a task is low importance and high effort, postpone it before it steals rescue time.',
     ],
-    promptIdeas: [
-      `You are an academic productivity coach. Given a student's goal, workload, available hours, and constraints, return a practical study plan with priorities, milestones, and next actions.\n\nGoal: ${form.goal}\nHours per day: ${form.hours}\nChallenges: ${form.challenges}\nDeadline: ${form.deadline}`,
-      'Rewrite the plan for a beginner-friendly student interface. Keep the advice encouraging, concrete, and broken into daily actions.',
+    pitchLine:
+      'An AI last-minute recovery system that turns overloaded student deadlines into a priority queue, rescue schedule, and risk-aware next steps.',
+    demoScript: [
+      'The student enters all pending work, time left, and current energy.',
+      'Smart Student Copilot scores what is truly dangerous instead of treating every task equally.',
+      'The result is a believable rescue plan the student can follow today.',
+    ],
+    promptPack: [
+      `You are Smart Student Copilot, an AI last-minute recovery coach for students.\nGoal: ${form.goal}\nAvailable hours today: ${availableHours}\nRescue window: ${rescueWindowHours} hours\nEnergy: ${form.energy}\nTasks:\n${taskContext}\n\nReturn the top priorities, what to start first, and what can safely wait.`,
+      `Compress the current study workload into a realistic rescue schedule. Keep the tone direct, calm, and practical. Notes: ${form.notes}`,
     ],
   }
 }
@@ -131,14 +372,90 @@ function extractJson(text) {
     return fenced[1].trim()
   }
 
-  const bracketStart = raw.indexOf('{')
-  const bracketEnd = raw.lastIndexOf('}')
+  const start = raw.indexOf('{')
+  const end = raw.lastIndexOf('}')
 
-  if (bracketStart !== -1 && bracketEnd !== -1 && bracketEnd > bracketStart) {
-    return raw.slice(bracketStart, bracketEnd + 1)
+  if (start !== -1 && end !== -1 && end > start) {
+    return raw.slice(start, end + 1)
   }
 
-  throw new Error('No JSON payload returned')
+  throw new Error('No JSON response found')
+}
+
+async function generateGeminiPlan(form, tasks) {
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY
+  const model = import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash'
+  const ai = new GoogleGenAI({ apiKey })
+
+  const safeTasks = tasks.filter((task) => task.title.trim())
+  const taskContext = (safeTasks.length ? safeTasks : initialTasks)
+    .map(
+      (task) =>
+        `- ${task.title || 'Untitled'} | due in ${task.dueInHours} hours | effort ${task.effortHours} hours | importance ${task.importance}/5`,
+    )
+    .join('\n')
+
+  const prompt = `
+You are Smart Student Copilot, an AI last-minute recovery system for students.
+Return only valid JSON.
+
+The product is built for Vibe2Ship Problem Statement 1: "The Last-Minute Life Saver."
+The response must feel practical, calm, and demo-ready.
+Do not give a generic motivational answer.
+
+JSON shape:
+{
+  "headline": string,
+  "summary": string,
+  "rescueMode": string,
+  "metrics": [
+    { "label": string, "value": string, "note": string },
+    { "label": string, "value": string, "note": string },
+    { "label": string, "value": string, "note": string },
+    { "label": string, "value": string, "note": string }
+  ],
+  "priorities": [
+    { "title": string, "score": number, "risk": "High" | "Medium" | "Low", "urgency": string, "why": string, "nextStep": string }
+  ],
+  "timeline": [
+    { "block": string, "duration": string, "task": string, "outcome": string }
+  ],
+  "risks": [
+    { "title": string, "severity": "High" | "Medium" | "Low", "warning": string, "fix": string }
+  ],
+  "coachTips": [string, string, string],
+  "pitchLine": string,
+  "demoScript": [string, string, string],
+  "promptPack": [string, string]
+}
+
+Student context:
+- Name: ${form.studentName}
+- Goal: ${form.goal}
+- Available hours today: ${form.availableHours}
+- Rescue window: ${form.rescueWindow} hours
+- Energy: ${form.energy}
+- Notes: ${form.notes}
+
+Tasks:
+${taskContext}
+
+Requirements:
+- Keep the output realistic for a second-year CS student.
+- Focus on priority order, immediate next steps, and deadline risk.
+- Make it obvious why this project is more useful than a normal to-do list.
+- Keep the plan tight enough to demo in under a minute.
+`.trim()
+
+  const response = await ai.models.generateContent({
+    model,
+    contents: prompt,
+    config: {
+      responseMimeType: 'application/json',
+    },
+  })
+
+  return JSON.parse(extractJson(response.text))
 }
 
 function setTilt(event) {
@@ -148,255 +465,114 @@ function setTilt(event) {
 
   const target = event.currentTarget
   const bounds = target.getBoundingClientRect()
-  const offsetX = event.clientX - bounds.left
-  const offsetY = event.clientY - bounds.top
-  const rotateY = ((offsetX / bounds.width) - 0.5) * 12
-  const rotateX = ((offsetY / bounds.height) - 0.5) * -10
-
-  target.style.setProperty('--tilt-x', `${rotateX.toFixed(2)}deg`)
-  target.style.setProperty('--tilt-y', `${rotateY.toFixed(2)}deg`)
-  target.style.setProperty('--glow-x', `${((offsetX / bounds.width) * 100).toFixed(1)}%`)
-  target.style.setProperty('--glow-y', `${((offsetY / bounds.height) * 100).toFixed(1)}%`)
+  const rotateX = ((event.clientY - bounds.top) / bounds.height - 0.5) * -9
+  const rotateY = ((event.clientX - bounds.left) / bounds.width - 0.5) * 10
+  target.style.setProperty('--card-rotate-x', `${rotateX.toFixed(2)}deg`)
+  target.style.setProperty('--card-rotate-y', `${rotateY.toFixed(2)}deg`)
 }
 
 function resetTilt(event) {
   const target = event.currentTarget
-  target.style.setProperty('--tilt-x', '0deg')
-  target.style.setProperty('--tilt-y', '0deg')
-  target.style.setProperty('--glow-x', '50%')
-  target.style.setProperty('--glow-y', '50%')
+  target.style.setProperty('--card-rotate-x', '0deg')
+  target.style.setProperty('--card-rotate-y', '0deg')
 }
 
-async function generateGeminiPlan(form) {
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY
-  const model = import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.5-flash'
-  const ai = new GoogleGenAI({ apiKey })
-
-  const prompt = `
-Return only valid JSON.
-
-You are helping a solo hackathon participant build an MVP called Smart Student Copilot.
-The output must be concise, practical, and realistic for a beginner-to-early-intermediate frontend developer.
-
-JSON shape:
-{
-  "title": string,
-  "pitch": string,
-  "focus": string,
-  "whyNow": string,
-  "roadmap": [
-    {
-      "label": string,
-      "items": [string, string, string]
-    }
-  ],
-  "todayTasks": [string, string, string, string],
-  "promptIdeas": [string, string]
+function revealClass(direction) {
+  return `reveal-item reveal-${direction}`
 }
 
-Context:
-- Participant name: ${form.name}
-- Goal: ${form.goal}
-- Available hours per day: ${form.hours}
-- Deadline: ${form.deadline}
-- Challenges: ${form.challenges}
-- Hackathon requirement: Google AI Studio must be used as part of the solution.
-- Keep the MVP focused on one strong workflow and avoid unnecessary complexity.
-`.trim()
+function splitTextFragments(text, groupSize = 3) {
+  const words = text.trim().split(/\s+/)
+  const fragments = []
 
-  const interaction = await ai.interactions.create({
-    model,
-    input: prompt,
-  })
+  for (let index = 0; index < words.length; index += groupSize) {
+    fragments.push(words.slice(index, index + groupSize).join(' '))
+  }
 
-  const payload = extractJson(interaction.outputText)
-  return JSON.parse(payload)
+  return fragments
+}
+
+function ScatterText({
+  as: Tag = 'p',
+  className = '',
+  groupSize = 3,
+  text,
+}) {
+  const directions = ['top-left', 'top-right', 'bottom-left', 'bottom-right']
+  const fragments = splitTextFragments(text, groupSize)
+
+  return (
+    <Tag className={`scatter-text reveal-item ${className}`.trim()} data-reveal>
+      {fragments.map((fragment, index) => (
+        <span
+          className={`scatter-fragment reveal-corner-${directions[index % directions.length]}`}
+          key={`${fragment}-${index}`}
+          style={{ transitionDelay: `${index * 90}ms` }}
+        >
+          {fragment}
+        </span>
+      ))}
+    </Tag>
+  )
 }
 
 function App() {
   const [form, setForm] = useState(initialForm)
-  const [plan, setPlan] = useState(() => buildFallbackPlan(initialForm))
+  const [tasks, setTasks] = useState(initialTasks)
+  const [plan, setPlan] = useState(() => buildFallbackPlan(initialForm, initialTasks))
   const [status, setStatus] = useState('idle')
   const [error, setError] = useState('')
-  const [copiedIndex, setCopiedIndex] = useState(null)
-  const [activeStage, setActiveStage] = useState('hero')
+  const [scrollProgress, setScrollProgress] = useState(0)
 
-  const aiMode = import.meta.env.VITE_GEMINI_API_KEY ? 'Gemini connected' : 'Demo mode'
-  const deferredActiveStage = useDeferredValue(activeStage)
+  const deferredPlan = useDeferredValue(plan)
+  const deferredScrollProgress = useDeferredValue(scrollProgress)
+  const aiMode = import.meta.env.VITE_GEMINI_API_KEY ? 'Gemini connected' : 'Demo scoring mode'
 
-  const heroStats = useMemo(
-    () => [
-      {
-        label: 'Mode',
-        value: aiMode,
-        detail: 'Planning engine state',
-      },
-      {
-        label: 'Stack',
-        value: 'React + Gemini',
-        detail: 'Frontend-first build',
-      },
-      {
-        label: 'Scope',
-        value: 'Solo MVP',
-        detail: 'One workflow locked',
-      },
-      {
-        label: 'Deadline',
-        value: 'Jun 29',
-        detail: 'Submission timing',
-      },
-    ],
-    [aiMode],
+  const taskCount = useMemo(
+    () => tasks.filter((task) => task.title.trim()).length,
+    [tasks],
   )
 
-  const signalStrip = useMemo(
-    () => [
-      'Google AI Studio required',
-      'One polished workflow',
-      'Solo-friendly scope',
-      'Judge-ready story',
-      'Deployed on Vercel',
-      'Prompt-driven planner',
-      'Verified Vibe2Ship refs',
-    ],
-    [],
+  const taskTotals = useMemo(
+    () =>
+      tasks.reduce(
+        (summary, task) => ({
+          effort: summary.effort + parseNumber(task.effortHours, 0),
+          urgent: summary.urgent + (parseNumber(task.dueInHours, 999) <= 24 ? 1 : 0),
+        }),
+        { effort: 0, urgent: 0 },
+      ),
+    [tasks],
   )
 
-  const sceneChecklist = useMemo(
-    () => [
-      'Official event links loaded into the product story',
-      'Gemini workflow positioned as the main live moment',
-      'Scope locked to one visible student productivity problem',
-    ],
-    [],
-  )
-
-  const proofMarkers = useMemo(
-    () => [
-      { label: 'Scope Lock', value: '1 strong workflow' },
-      { label: 'Builder Fit', value: 'Beginner-friendly stack' },
-      { label: 'Judge Hook', value: 'Clear live output' },
-    ],
-    [],
-  )
-
-  const systemSignals = useMemo(
-    () => [
-      {
-        label: 'Problem Surface',
-        value: 'Student overload is scattered',
-        detail: 'Assignments, study targets, deadlines, and learning resources usually live in different places.',
-      },
-      {
-        label: 'AI Core',
-        value: 'Goal to plan to next move',
-        detail: 'The product takes one messy input and turns it into priorities, milestones, and daily action.',
-      },
-      {
-        label: 'Submission Edge',
-        value: 'Easy to judge in one minute',
-        detail: 'The flow is simple to explain, polished to show, and realistic for a solo builder to finish.',
-      },
-    ],
-    [],
-  )
-
-  const storyCards = useMemo(
-    () => [
-      {
-        label: 'Before',
-        title: 'Students usually begin with chaos',
-        detail:
-          'Too many tabs, unclear priorities, and no simple place to decide what matters first.',
-      },
-      {
-        label: 'Copilot Engine',
-        title: 'The AI narrows the problem fast',
-        detail: plan.focus,
-      },
-      {
-        label: 'After',
-        title: 'The output feels immediately useful',
-        detail:
-          'A student sees what to do today, what to push later, and how to move forward without overthinking.',
-      },
-    ],
-    [plan.focus],
-  )
-
-  const resultHighlights = useMemo(
-    () => [
-      {
-        title: 'Product Pitch',
-        detail: plan.pitch,
-      },
-      {
-        title: 'MVP Focus',
-        detail: plan.focus,
-      },
-      {
-        title: 'Why It Works',
-        detail: plan.whyNow,
-      },
-    ],
-    [plan],
-  )
-
-  const activeStageIndex = useMemo(
-    () => scrollStages.findIndex((stage) => stage.id === deferredActiveStage),
-    [deferredActiveStage],
-  )
-
-  const activeStageMeta = useMemo(
-    () => scrollStages[Math.max(activeStageIndex, 0)] ?? scrollStages[0],
-    [activeStageIndex],
-  )
-
-  const syncScrollDepth = useEffectEvent(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      document.documentElement.style.setProperty('--page-progress', '0')
-      document.documentElement.style.setProperty('--hero-shift', '0px')
-      document.documentElement.style.setProperty('--hero-tilt', '0deg')
-      document.documentElement.style.setProperty('--scene-lift', '0px')
-      return
-    }
-
-    const scrollTop = window.scrollY
-    const maxScroll = document.documentElement.scrollHeight - window.innerHeight
-    const progress = maxScroll > 0 ? Math.min(scrollTop / maxScroll, 1) : 0
-    const heroShift = Math.min(scrollTop * 0.1, 96)
-    const heroTilt = Math.min(scrollTop * 0.018, 8)
-    const sceneLift = Math.min(scrollTop * 0.085, 72)
-
-    document.documentElement.style.setProperty('--page-progress', progress.toFixed(4))
-    document.documentElement.style.setProperty('--hero-shift', `${heroShift.toFixed(2)}px`)
-    document.documentElement.style.setProperty('--hero-tilt', `${heroTilt.toFixed(2)}deg`)
-    document.documentElement.style.setProperty('--scene-lift', `${sceneLift.toFixed(2)}px`)
-  })
-
-  const syncActiveStage = useEffectEvent((entries) => {
-    let nextStage = deferredActiveStage
-    let strongest = 0
-
-    for (const entry of entries) {
-      const stageId = entry.target.getAttribute('data-stage')
-
-      if (!stageId) {
-        continue
-      }
-
-      if (entry.isIntersecting && entry.intersectionRatio >= strongest) {
-        strongest = entry.intersectionRatio
-        nextStage = stageId
+  const studentMood = useMemo(() => {
+    if (deferredScrollProgress < 0.34) {
+      return {
+        label: 'Pressure Peak',
+        detail: 'Too many deadlines, too much noise, and no clear first move yet.',
       }
     }
 
-    if (nextStage !== deferredActiveStage) {
-      startTransition(() => {
-        setActiveStage(nextStage)
-      })
+    if (deferredScrollProgress < 0.68) {
+      return {
+        label: 'Recovery Shift',
+        detail: 'The student is still under pressure, but the rescue plan is creating order.',
+      }
     }
+
+    return {
+      label: 'Calm Control',
+      detail: 'The pressure clears because the work is finally organized into action.',
+    }
+  }, [deferredScrollProgress])
+
+  const syncStoryProgress = useEffectEvent(() => {
+    const maxScroll = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1)
+    const nextProgress = Math.min(window.scrollY / maxScroll, 1)
+
+    setScrollProgress((current) =>
+      Math.abs(current - nextProgress) > 0.008 ? nextProgress : current,
+    )
   })
 
   useEffect(() => {
@@ -409,7 +585,7 @@ function App() {
 
       frameId = window.requestAnimationFrame(() => {
         frameId = 0
-        syncScrollDepth()
+        syncStoryProgress()
       })
     }
 
@@ -428,16 +604,28 @@ function App() {
   }, [])
 
   useEffect(() => {
-    const nodes = Array.from(document.querySelectorAll('[data-stage]'))
+    const nodes = Array.from(document.querySelectorAll('[data-reveal]'))
 
     if (!nodes.length) {
       return undefined
     }
 
-    const observer = new IntersectionObserver(syncActiveStage, {
-      threshold: [0.2, 0.35, 0.5, 0.7],
-      rootMargin: '-18% 0px -30% 0px',
-    })
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) {
+            continue
+          }
+
+          entry.target.classList.add('reveal-visible')
+          observer.unobserve(entry.target)
+        }
+      },
+      {
+        threshold: 0.14,
+        rootMargin: '0px 0px -10% 0px',
+      },
+    )
 
     for (const node of nodes) {
       observer.observe(node)
@@ -448,6 +636,35 @@ function App() {
     }
   }, [])
 
+  function updateForm(field, value) {
+    setForm((current) => ({ ...current, [field]: value }))
+  }
+
+  function updateTask(id, field, value) {
+    setTasks((current) =>
+      current.map((task) => (task.id === id ? { ...task, [field]: value } : task)),
+    )
+  }
+
+  function addTask() {
+    setTasks((current) => [...current, createTask()])
+  }
+
+  function removeTask(id) {
+    setTasks((current) => (current.length > 1 ? current.filter((task) => task.id !== id) : current))
+  }
+
+  function loadScenario(preset) {
+    startTransition(() => {
+      setForm((current) => ({
+        ...current,
+        ...preset.form,
+      }))
+      setTasks(preset.tasks)
+      setPlan(buildFallbackPlan({ ...form, ...preset.form }, preset.tasks))
+    })
+  }
+
   async function handleGenerate(event) {
     event.preventDefault()
     setStatus('loading')
@@ -455,576 +672,529 @@ function App() {
 
     try {
       const nextPlan = import.meta.env.VITE_GEMINI_API_KEY
-        ? await generateGeminiPlan(form)
-        : buildFallbackPlan(form)
+        ? await generateGeminiPlan(form, tasks)
+        : buildFallbackPlan(form, tasks)
 
       startTransition(() => {
         setPlan(nextPlan)
         setStatus('done')
       })
     } catch (err) {
-      setPlan(buildFallbackPlan(form))
+      setPlan(buildFallbackPlan(form, tasks))
       setStatus('done')
       setError(
         err instanceof Error
-          ? `${err.message}. Showing the built-in demo plan instead.`
-          : 'Gemini generation failed. Showing the built-in demo plan instead.',
+          ? `${err.message}. Showing the built-in rescue engine instead.`
+          : 'Gemini generation failed. Showing the built-in rescue engine instead.',
       )
     }
   }
 
-  async function handleCopyPrompt(index, prompt) {
-    await navigator.clipboard.writeText(prompt)
-    setCopiedIndex(index)
-    window.setTimeout(() => setCopiedIndex(null), 1400)
-  }
-
-  function updateField(field, value) {
-    setForm((current) => ({ ...current, [field]: value }))
-  }
-
-  function stagePanelClass(base, stageId) {
-    return `${base} stage-panel${deferredActiveStage === stageId ? ' stage-panel-active' : ''}`
-  }
-
   return (
-    <div className="page-shell">
-      <div className="backdrop">
-        <div className="backdrop-grid" />
-        <div className="backdrop-orb backdrop-orb-a" />
-        <div className="backdrop-orb backdrop-orb-b" />
-        <div className="backdrop-orb backdrop-orb-c" />
-      </div>
+    <div
+      className="app-shell"
+      style={{ '--story-progress': deferredScrollProgress.toFixed(4) }}
+    >
+      <div className="ambient ambient-a" />
+      <div className="ambient ambient-b" />
+      <div className="readability-wash" aria-hidden="true" />
 
-      <header
-        className={`hero${deferredActiveStage === 'hero' ? ' hero-active' : ''}`}
-        id="hero"
-        data-stage="hero"
-      >
-        <nav className="topbar" aria-label="Primary">
-          <div className="brand-lockup">
-            <span className="brand-mark">SSC</span>
-            <div>
-              <p className="eyebrow">Vibe2Ship Build</p>
-              <strong>Smart Student Copilot</strong>
-            </div>
+      <header className="hero-panel">
+        <div className="hero-noise" />
+        <div className="hero-beam hero-beam-a" />
+        <div className="hero-beam hero-beam-b" />
+        <div className="hero-gridline hero-gridline-a" />
+        <div className="hero-gridline hero-gridline-b" />
+        <div className="student-storybackdrop" aria-hidden="true">
+          <div className="story-word word-pressure">OVERLOAD</div>
+          <div className="story-word word-relief">RELIEF</div>
+
+          <div className="student-pressure-cloud">
+            <div className="pressure-note pressure-note-a">5 deadlines</div>
+            <div className="pressure-note pressure-note-b">No time left</div>
+            <div className="pressure-note pressure-note-c">Exam week</div>
+            <div className="pressure-note pressure-note-d">Submission panic</div>
           </div>
 
-          <div className="topbar-meta">
-            <div className="status-pill" aria-label="Build status">
-              <span className="status-dot" />
-              Build story active
-            </div>
-            <div className="topbar-links">
-              <a href="#planner">Planner</a>
-              <a href="#roadmap">Roadmap</a>
-              <a href="#prompts">Prompt Pack</a>
-            </div>
-          </div>
-        </nav>
-
-        <div className="hero-layout">
-          <section className="hero-copy">
-            <div className="hero-availability">
-              <span className="status-dot" />
-              <p>Available to ship a focused student AI product</p>
-            </div>
-
-            <p className="eyebrow">AI Productivity Prototype</p>
-
-            <div className="hero-headline-grid">
-              <div className="hero-headline-stack">
-                <span className="hero-outline-word">Turn</span>
-                <span className="hero-solid-word">student overload</span>
-              </div>
-
-              <div className="hero-sideword">
-                <span>Master Your</span>
-                <strong>FLOW</strong>
-              </div>
-            </div>
-
-            <h1 className="hero-subheadline">into a clean, demo-ready AI workflow.</h1>
-            <p className="hero-text">
-              Smart Student Copilot keeps the same product idea, but presents it like a
-              serious product: students enter goals, available time, and blockers, then get
-              a calm AI-backed action plan they can actually follow.
-            </p>
-
-            <div className="hero-actions">
-              <a className="primary-link" href="#planner">
-                Generate MVP Plan
-              </a>
-              <a
-                className="secondary-link"
-                href="https://smart-student-copilot.vercel.app"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Open Live Build
-              </a>
-            </div>
-
-            <div className="scroll-enter">
+          <div className="nobita-story">
+            <div className="nobita-aura nobita-aura-sleep" />
+            <div className="nobita-aura nobita-aura-study" />
+            <div className="nobita-scene nobita-scene-sleep" />
+            <div className="nobita-scene nobita-scene-transition" />
+            <div className="nobita-scene nobita-scene-study" />
+            <div className="nobita-progress-line">
               <span />
-              <p>Scroll to enter the build story</p>
+            </div>
+            <div className="student-success-orb">
+              <span>Study mode</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="hero-copy">
+          <div className={`hero-badges ${revealClass('left')}`} data-reveal>
+            <span className="chip chip-primary">Vibe2Ship Statement 1</span>
+            <span className="chip">{aiMode}</span>
+          </div>
+
+          <p className={`eyebrow ${revealClass('up')}`} data-reveal>
+            Smart Student Copilot
+          </p>
+          <ScatterText
+            as="h1"
+            className="hero-title"
+            groupSize={2}
+            text="An AI last-minute recovery system for overloaded students."
+          />
+          <div className={`hero-signal-bar ${revealClass('left')}`} data-reveal>
+            <span>Chaos</span>
+            <span>Scoring</span>
+            <span>Rescue Engine</span>
+            <span>Action Plan</span>
+          </div>
+          <div className={`mood-caption ${revealClass('up')}`} data-reveal>
+            <span>{studentMood.label}</span>
+            <p>{studentMood.detail}</p>
+          </div>
+          <ScatterText
+            className="hero-text"
+            groupSize={4}
+            text="This is the final product direction: students dump pending work, available time, and current pressure into one place. Smart Student Copilot then turns that overload into a priority queue, rescue schedule, and risk-aware next steps."
+          />
+
+          <div className={`hero-actions ${revealClass('left')}`} data-reveal>
+            <a className="button button-primary" href="#mission">
+              Build Rescue Plan
+            </a>
+            <a className="button button-secondary" href="#results">
+              See Output
+            </a>
+          </div>
+
+          <div className={`hero-metrics ${revealClass('up')}`} data-reveal>
+            {deferredPlan.metrics.map((metric) => (
+              <article className="metric-card" key={metric.label}>
+                <span>{metric.label}</span>
+                <strong>{metric.value}</strong>
+                <p>{metric.note}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+
+        <article
+          className={`hero-stage cinematic-card ${revealClass('right')}`}
+          data-reveal
+          onMouseMove={setTilt}
+          onMouseLeave={resetTilt}
+        >
+          <div className="stage-shell">
+            <div className="stage-copy-wrap">
+              <p className="eyebrow">Judge Hook</p>
+              <ScatterText as="h2" className="stage-title" groupSize={3} text={deferredPlan.pitchLine} />
+              <ScatterText
+                className="stage-copy"
+                groupSize={4}
+                text="The core win is not another planner. It is a rescue workflow that decides what is actually dangerous, what to start now, and what can wait."
+              />
             </div>
 
-            <div className="stat-grid">
-              {heroStats.map((item) => (
-                <article className="stat-card" key={item.label}>
-                  <span>{item.label}</span>
-                  <strong>{item.value}</strong>
-                  <p>{item.detail}</p>
+            <div className="stage-scene">
+              <div className="scene-layer scene-layer-back" />
+              <div className="scene-layer scene-layer-mid" />
+              <div className="scene-platform" />
+              <div className="scene-orbit orbit-a" />
+              <div className="scene-orbit orbit-b" />
+              <div className="scene-orbit orbit-c" />
+              <div className="scene-core">
+                <div className="core-shell core-shell-a" />
+                <div className="core-shell core-shell-b" />
+                <div className="core-sphere">
+                  <span>AI</span>
+                  <strong>Rescue Engine</strong>
+                </div>
+              </div>
+
+              <article className="scene-float scene-float-a">
+                <span className="stage-label">Mission mode</span>
+                <strong>{deferredPlan.rescueMode}</strong>
+                <p>Live system decides what is slipping first.</p>
+              </article>
+
+              {deferredPlan.priorities.slice(0, 2).map((item, index) => (
+                <article className={`scene-float scene-float-priority scene-float-priority-${index + 1}`} key={item.title}>
+                  <span className="stage-label">{item.risk} risk</span>
+                  <strong>{item.title}</strong>
+                  <p>{item.urgency}</p>
                 </article>
               ))}
             </div>
-          </section>
+          </div>
 
-          <section className="hero-scene" aria-label="Product system view">
-            <div className="scene-rails scene-rails-horizontal" />
-            <div className="scene-rails scene-rails-vertical" />
-            <div className="scene-orbit" />
-            <div className="scene-grid" />
-            <div className="scene-glow scene-glow-primary" />
-            <div className="scene-glow scene-glow-secondary" />
-
-            <article
-              className="scene-panel scene-panel-main interactive-card"
-              onMouseMove={setTilt}
-              onMouseLeave={resetTilt}
-            >
-              <div className="card-sheen" />
-              <div className="scene-head">
-                <p className="card-badge">Mission Status</p>
-                <span className="status-chip">Ready to demo</span>
-              </div>
-              <h2>{plan.pitch}</h2>
-              <p>{plan.focus}</p>
-
-              <div className="scene-metric-row">
-                {proofMarkers.map((item) => (
-                  <article className="marker-card" key={item.label}>
-                    <span>{item.label}</span>
-                    <strong>{item.value}</strong>
-                  </article>
-                ))}
-              </div>
-
-              <div className="scene-progress" aria-hidden="true">
-                <span />
-                <span />
-                <span />
-              </div>
-            </article>
-          </section>
-        </div>
+          <div className="stage-grid">
+            <div>
+              <span className="stage-label">Problem fit</span>
+              <strong>The Last-Minute Life Saver</strong>
+            </div>
+            <div>
+              <span className="stage-label">Workflow</span>
+              <strong>Input → score → rescue plan</strong>
+            </div>
+            <div>
+              <span className="stage-label">Builder fit</span>
+              <strong>Solo-friendly React + Gemini</strong>
+            </div>
+            <div>
+              <span className="stage-label">Submission goal</span>
+              <strong>Simple, useful, demo-ready</strong>
+            </div>
+          </div>
+        </article>
       </header>
 
-      <section className="signal-strip" aria-label="Project highlights">
-        <div className="signal-track">
-          {signalStrip.concat(signalStrip).map((item, index) => (
-            <span className="signal-pill" key={`${item}-${index}`}>
-              {item}
-            </span>
-          ))}
-        </div>
-      </section>
-
-      <section className="hero-support-grid" aria-label="Hero support details">
-        <article className="support-card">
-          <p className="card-badge">Build Window</p>
-          <ul className="support-list">
-            {sceneChecklist.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </article>
-
-        <article className="support-card">
-          <p className="card-badge">Judge Lens</p>
-          <p className="support-copy">
-            One strong AI workflow beats a feature-heavy student dashboard. The story should
-            show clear input, clear intelligence, and a result that looks immediately useful.
-          </p>
-        </article>
-      </section>
-
-      <section className="scroll-dock" aria-label="Scroll narrative status">
-        <div className="scroll-dock-copy">
-          <p className="eyebrow">Scroll Depth</p>
-          <h2>{activeStageMeta.label}</h2>
-          <p>{activeStageMeta.detail}</p>
-        </div>
-
-        <div className="scroll-dock-rail">
-          <div className="scroll-progress-bar" aria-hidden="true">
-            <span style={{ width: `${((activeStageIndex + 1) / scrollStages.length) * 100}%` }} />
-          </div>
-
-          <div className="scroll-stage-grid">
-            {scrollStages.map((stage, index) => (
-              <a
-                className={`scroll-stage-card${deferredActiveStage === stage.id ? ' scroll-stage-card-active' : ''}`}
-                href={`#${stage.id}`}
-                key={stage.id}
-              >
-                <span>{stage.code}</span>
-                <strong>{stage.label}</strong>
-                <p>{index <= activeStageIndex ? 'Live' : 'Pending'}</p>
-              </a>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <main className="content-grid">
-        <section className={stagePanelClass('panel planner-panel', 'planner')} id="planner" data-stage="planner">
-          <div className="section-head">
-            <p className="eyebrow">Mission Input</p>
-            <h2>Generate a realistic solo build plan</h2>
-            <p>
-              Keep the product story sharp, the scope small, and the AI output useful enough
-              to demo in one minute.
-            </p>
-          </div>
-
-          <form className="planner-form" onSubmit={handleGenerate}>
-            <label>
-              <span>Builder name</span>
-              <input
-                value={form.name}
-                onChange={(event) => updateField('name', event.target.value)}
+      <main className="workspace">
+        <section className="column column-builder" id="mission">
+          <article className="panel">
+            <div className={`section-head ${revealClass('left')}`} data-reveal>
+              <p className="eyebrow">Mission Input</p>
+              <ScatterText as="h2" groupSize={2} text="Describe the overload" />
+              <ScatterText
+                groupSize={4}
+                text="Feed the app the real deadline pressure. The stronger the input, the more useful the rescue plan feels in a live demo."
               />
-            </label>
-
-            <label>
-              <span>Project goal</span>
-              <textarea
-                rows="4"
-                value={form.goal}
-                onChange={(event) => updateField('goal', event.target.value)}
-              />
-            </label>
-
-            <div className="two-up">
-              <label>
-                <span>Hours per day</span>
-                <input
-                  type="number"
-                  min="1"
-                  max="12"
-                  value={form.hours}
-                  onChange={(event) => updateField('hours', event.target.value)}
-                />
-              </label>
-
-              <label>
-                <span>Deadline</span>
-                <input
-                  value={form.deadline}
-                  onChange={(event) => updateField('deadline', event.target.value)}
-                />
-              </label>
             </div>
 
-            <label>
-              <span>Current challenges</span>
-              <textarea
-                rows="4"
-                value={form.challenges}
-                onChange={(event) => updateField('challenges', event.target.value)}
-              />
-            </label>
+            <form className={`planner-form ${revealClass('up')}`} data-reveal onSubmit={handleGenerate}>
+              <label>
+                <span>Student name</span>
+                <input
+                  value={form.studentName}
+                  onChange={(event) => updateForm('studentName', event.target.value)}
+                />
+              </label>
 
-            <div className="form-meta">
-              <p>
-                {aiMode === 'Gemini connected'
-                  ? 'Gemini mode is active. The planner uses the Google AI Studio-backed SDK.'
-                  : 'Demo mode is active. Add VITE_GEMINI_API_KEY later to unlock Gemini-backed planning.'}
-              </p>
-              <button type="submit" className="generate-button" disabled={status === 'loading'}>
-                {status === 'loading' ? 'Generating...' : 'Generate Hackathon Plan'}
+              <label>
+                <span>Recovery goal</span>
+                <textarea
+                  rows="3"
+                  value={form.goal}
+                  onChange={(event) => updateForm('goal', event.target.value)}
+                />
+              </label>
+
+              <div className="field-grid">
+                <label>
+                  <span>Hours available today</span>
+                  <input
+                    type="number"
+                    min="1"
+                    max="16"
+                    value={form.availableHours}
+                    onChange={(event) => updateForm('availableHours', event.target.value)}
+                  />
+                </label>
+
+                <label>
+                  <span>Rescue window</span>
+                  <select
+                    value={form.rescueWindow}
+                    onChange={(event) => updateForm('rescueWindow', event.target.value)}
+                  >
+                    {rescueWindows.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+
+              <label>
+                <span>Current energy</span>
+                <div className="toggle-row" role="radiogroup" aria-label="Current energy">
+                  {energyOptions.map((option) => (
+                    <button
+                      className={`toggle-chip${form.energy === option.value ? ' toggle-chip-active' : ''}`}
+                      key={option.value}
+                      onClick={(event) => {
+                        event.preventDefault()
+                        updateForm('energy', option.value)
+                      }}
+                      type="button"
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </label>
+
+              <label>
+                <span>Notes for the copilot</span>
+                <textarea
+                  rows="3"
+                  value={form.notes}
+                  onChange={(event) => updateForm('notes', event.target.value)}
+                />
+              </label>
+
+              <div className="preset-row">
+                <span>Quick demo setups</span>
+                <div className="preset-actions">
+                  {scenarioPresets.map((preset) => (
+                    <button
+                      className="button button-ghost"
+                      key={preset.label}
+                      onClick={() => loadScenario(preset)}
+                      type="button"
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="form-footer">
+                <p>
+                  {aiMode === 'Gemini connected'
+                    ? 'Gemini is active. The output can become a live AI planning moment in the demo.'
+                    : 'Demo scoring mode is active. Add VITE_GEMINI_API_KEY to switch to Gemini-backed planning.'}
+                </p>
+                <button className="button button-primary" disabled={status === 'loading'} type="submit">
+                  {status === 'loading' ? 'Building rescue plan...' : 'Generate Rescue Plan'}
+                </button>
+              </div>
+            </form>
+
+            {error ? <p className="notice">{error}</p> : null}
+          </article>
+
+          <article className="panel">
+            <div className={`section-head compact-head ${revealClass('right')}`} data-reveal>
+              <div>
+                <p className="eyebrow">Task Pressure</p>
+                <ScatterText as="h2" groupSize={2} text="Capture the real deadlines" />
+              </div>
+              <button className="button button-secondary" onClick={addTask} type="button">
+                Add task
               </button>
             </div>
-          </form>
 
-          {error ? <p className="notice warning">{error}</p> : null}
-        </section>
+            <div className={`task-overview ${revealClass('up')}`} data-reveal>
+              <div className="overview-pill">
+                <span>Tasks</span>
+                <strong>{taskCount}</strong>
+              </div>
+              <div className="overview-pill">
+                <span>Total effort</span>
+                <strong>{taskTotals.effort}h</strong>
+              </div>
+              <div className="overview-pill">
+                <span>Due in 24h</span>
+                <strong>{taskTotals.urgent}</strong>
+              </div>
+            </div>
 
-        <section className={stagePanelClass('panel mission-panel', 'planner')} data-stage="planner">
-          <div className="section-head">
-            <p className="eyebrow">Official Context</p>
-            <h2>Real hackathon references</h2>
-            <p>
-              The product keeps the verified event context visible so the project story stays
-              grounded in the actual Vibe2Ship requirement set.
-            </p>
-          </div>
-
-          <ul className="resource-list">
-            {officialLinks.map((item, index) => (
-              <li key={item.href}>
-                <a href={item.href} target="_blank" rel="noreferrer">
-                  <span className="resource-index">0{index + 1}</span>
-                  <span>{item.label}</span>
-                </a>
-              </li>
-            ))}
-          </ul>
-
-          <ul className="context-list">
-            <li>Solo participation is supported.</li>
-            <li>Google AI Studio usage is part of the challenge requirement.</li>
-            <li>Final detailed statements remain participant-gated inside the event flow.</li>
-          </ul>
-        </section>
-
-        <section
-          className={stagePanelClass('panel panel-wide systems-panel', 'systems')}
-          id="systems"
-          data-stage="systems"
-        >
-          <div className="section-head">
-            <p className="eyebrow">System Signals</p>
-            <h2>Why this project direction is strong</h2>
-          </div>
-
-          <div className="systems-grid">
-            {systemSignals.map((item) => (
-              <article
-                className="system-card interactive-card"
-                key={item.label}
-                onMouseMove={setTilt}
-                onMouseLeave={resetTilt}
-              >
-                <div className="card-sheen" />
-                <p className="roadmap-label">{item.label}</p>
-                <h3>{item.value}</h3>
-                <p>{item.detail}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section
-          className={stagePanelClass('panel panel-wide story-panel', 'story')}
-          id="story"
-          data-stage="story"
-        >
-          <div className="section-head">
-            <p className="eyebrow">Narrative Flow</p>
-            <h2>Keep the product story easy to understand</h2>
-          </div>
-
-          <div className="story-grid">
-            {storyCards.map((item) => (
-              <article
-                className="insight-card interactive-card"
-                key={item.title}
-                onMouseMove={setTilt}
-                onMouseLeave={resetTilt}
-              >
-                <div className="card-sheen" />
-                <p className="roadmap-label">{item.label}</p>
-                <h3>{item.title}</h3>
-                <p>{item.detail}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section
-          className={stagePanelClass('panel panel-wide signal-panel', 'execution')}
-          id="execution"
-          data-stage="execution"
-        >
-          <div className="section-head">
-            <p className="eyebrow">Execution Layer</p>
-            <h2>{plan.title}</h2>
-          </div>
-
-          <div className="insight-grid">
-            {resultHighlights.map((item) => (
-              <article
-                className="insight-card interactive-card"
-                key={item.title}
-                onMouseMove={setTilt}
-                onMouseLeave={resetTilt}
-              >
-                <div className="card-sheen" />
-                <h3>{item.title}</h3>
-                <p>{item.detail}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section
-          className={stagePanelClass('panel panel-wide roadmap-panel', 'roadmap')}
-          id="roadmap"
-          data-stage="roadmap"
-        >
-          <div className="section-head">
-            <p className="eyebrow">Roadmap</p>
-            <h2>Build sequence with stronger visual discipline</h2>
-          </div>
-
-          <div className="roadmap-grid">
-            {plan.roadmap.map((block) => (
-              <article
-                className="roadmap-card interactive-card"
-                key={block.label}
-                onMouseMove={setTilt}
-                onMouseLeave={resetTilt}
-              >
-                <div className="card-sheen" />
-                <p className="roadmap-label">{block.label}</p>
-                <ul>
-                  {block.items.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className={stagePanelClass('panel', 'roadmap')} data-stage="roadmap">
-          <div className="section-head">
-            <p className="eyebrow">Immediate Moves</p>
-            <h2>What to do next</h2>
-          </div>
-          <ol className="task-list">
-            {plan.todayTasks.map((task) => (
-              <li key={task}>{task}</li>
-            ))}
-          </ol>
-        </section>
-
-        <section className={stagePanelClass('panel', 'result')} id="result" data-stage="result">
-          <div className="section-head">
-            <p className="eyebrow">Generated View</p>
-            <h2>What the result screen should feel like</h2>
-          </div>
-          <div className="result-deck">
-            <article
-              className="result-card result-card-feature interactive-card"
-              onMouseMove={setTilt}
-              onMouseLeave={resetTilt}
-            >
-              <div className="card-sheen" />
-              <div className="card-badge">AI Output</div>
-              <h3>Priority-first study plan</h3>
-              <p>{plan.promptIdeas[1]}</p>
-            </article>
-            <article
-              className="result-card interactive-card"
-              onMouseMove={setTilt}
-              onMouseLeave={resetTilt}
-            >
-              <div className="card-sheen" />
-              <div className="card-badge">Today</div>
-              <ul>
-                {plan.todayTasks.slice(0, 3).map((task) => (
-                  <li key={task}>{task}</li>
-                ))}
-              </ul>
-            </article>
-            <article
-              className="result-card interactive-card"
-              onMouseMove={setTilt}
-              onMouseLeave={resetTilt}
-            >
-              <div className="card-sheen" />
-              <div className="card-badge">Proof of Value</div>
-              <p>
-                One polished AI workflow is easier to judge, easier to explain, and easier to
-                ship than a wide feature set with weak execution.
-              </p>
-            </article>
-          </div>
-        </section>
-
-        <section className={stagePanelClass('panel', 'prompts')} id="prompts" data-stage="prompts">
-          <div className="section-head">
-            <p className="eyebrow">Prompt Pack</p>
-            <h2>Gemini prompts ready to reuse</h2>
-          </div>
-          <div className="prompt-stack">
-            {plan.promptIdeas.map((prompt, index) => (
-              <article className="prompt-card" key={prompt}>
-                <pre>{prompt}</pre>
-                <button type="button" onClick={() => handleCopyPrompt(index, prompt)}>
-                  {copiedIndex === index ? 'Copied' : 'Copy prompt'}
-                </button>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section
-          className={stagePanelClass('panel panel-wide', 'submission')}
-          id="submission"
-          data-stage="submission"
-        >
-          <div className="section-head">
-            <p className="eyebrow">Submission Prep</p>
-            <h2>Screenshots and demo copy ready for the final story</h2>
-          </div>
-
-          <div className="submission-grid">
-            <div className="demo-frame-grid">
-              {demoFrames.map((frame) => (
+            <div className="task-stack">
+              {tasks.map((task, index) => (
                 <article
-                  className="demo-frame interactive-card"
-                  key={frame.label}
+                  className={`task-card ${revealClass(index % 2 === 0 ? 'left' : 'right')}`}
+                  data-reveal
+                  key={task.id}
+                >
+                  <div className="task-card-head">
+                    <p>Task {index + 1}</p>
+                    <button
+                      aria-label={`Remove task ${index + 1}`}
+                      className="icon-button"
+                      onClick={() => removeTask(task.id)}
+                      type="button"
+                    >
+                      Remove
+                    </button>
+                  </div>
+
+                  <label>
+                    <span>Task title</span>
+                    <input
+                      value={task.title}
+                      onChange={(event) => updateTask(task.id, 'title', event.target.value)}
+                      placeholder="Ex: Finish OS assignment"
+                    />
+                  </label>
+
+                  <div className="field-grid three-up">
+                    <label>
+                      <span>Due in hours</span>
+                      <input
+                        type="number"
+                        min="1"
+                        value={task.dueInHours}
+                        onChange={(event) => updateTask(task.id, 'dueInHours', event.target.value)}
+                      />
+                    </label>
+
+                    <label>
+                      <span>Effort hours</span>
+                      <input
+                        type="number"
+                        min="1"
+                        value={task.effortHours}
+                        onChange={(event) => updateTask(task.id, 'effortHours', event.target.value)}
+                      />
+                    </label>
+
+                    <label>
+                      <span>Importance</span>
+                      <select
+                        value={task.importance}
+                        onChange={(event) => updateTask(task.id, 'importance', event.target.value)}
+                      >
+                        <option value="1">1 - Low</option>
+                        <option value="2">2</option>
+                        <option value="3">3 - Medium</option>
+                        <option value="4">4</option>
+                        <option value="5">5 - Critical</option>
+                      </select>
+                    </label>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </article>
+
+        </section>
+
+        <section className="column column-results" id="results">
+          <article className={`panel panel-highlight ${revealClass('up')}`} data-reveal>
+            <div className="section-head">
+              <p className="eyebrow">Rescue Output</p>
+              <ScatterText as="h2" groupSize={3} text={deferredPlan.headline} />
+              <ScatterText groupSize={4} text={deferredPlan.summary} />
+            </div>
+
+            <div className="mode-banner">
+              <span className="chip chip-primary">{deferredPlan.rescueMode}</span>
+              <p>{deferredPlan.pitchLine}</p>
+            </div>
+          </article>
+
+          <div className={`metric-grid ${revealClass('up')}`} data-reveal>
+            {deferredPlan.metrics.map((metric) => (
+              <article className="panel metric-panel" key={metric.label}>
+                <span>{metric.label}</span>
+                <strong>{metric.value}</strong>
+                <p>{metric.note}</p>
+              </article>
+            ))}
+          </div>
+
+          <article className="panel">
+            <div className={`section-head compact-head ${revealClass('left')}`} data-reveal>
+              <div>
+                <p className="eyebrow">Priority Queue</p>
+                <ScatterText as="h2" groupSize={2} text="What to attack first" />
+              </div>
+            </div>
+
+            <div className="priority-list">
+              {deferredPlan.priorities.map((item, index) => (
+                <article
+                  className={`priority-card cinematic-card ${revealClass(index % 2 === 0 ? 'left' : 'right')}`}
+                  data-reveal
+                  key={item.title}
                   onMouseMove={setTilt}
                   onMouseLeave={resetTilt}
                 >
-                  <div className="card-sheen" />
-                  <p className="roadmap-label">{frame.label}</p>
-                  <h3>{frame.title}</h3>
-                  <p>{frame.detail}</p>
+                  <div className="priority-head">
+                    <div>
+                      <p>{item.urgency}</p>
+                      <h3>{item.title}</h3>
+                    </div>
+                    <div className={`risk-pill risk-${item.risk.toLowerCase()}`}>
+                      {item.risk} • {item.score}
+                    </div>
+                  </div>
+                  <p>{item.why}</p>
+                  <strong>{item.nextStep}</strong>
                 </article>
               ))}
             </div>
+          </article>
 
-            <article className="demo-script-card">
-              <p className="eyebrow">Voiceover Copy</p>
+          <article className="panel">
+            <div className={`section-head ${revealClass('right')}`} data-reveal>
+              <p className="eyebrow">Daily Rescue Plan</p>
+              <ScatterText as="h2" groupSize={2} text="What today should look like" />
+            </div>
+
+            <div className="timeline">
+              {deferredPlan.timeline.map((block) => (
+                <div className={`timeline-row ${revealClass('up')}`} data-reveal key={block.block}>
+                  <div className="timeline-tag">
+                    <span>{block.block}</span>
+                    <strong>{block.duration}</strong>
+                  </div>
+                  <div className="timeline-copy">
+                    <h3>{block.task}</h3>
+                    <p>{block.outcome}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </article>
+
+          <article className="panel">
+            <div className={`section-head ${revealClass('left')}`} data-reveal>
+              <p className="eyebrow">Risk Alerts</p>
+              <ScatterText as="h2" groupSize={2} text="What could still go wrong" />
+            </div>
+
+            <div className="risk-grid">
+              {deferredPlan.risks.map((risk, index) => (
+                <article
+                  className={`risk-card ${revealClass(index % 2 === 0 ? 'left' : 'right')}`}
+                  data-reveal
+                  key={risk.title}
+                >
+                  <div className="priority-head">
+                    <h3>{risk.title}</h3>
+                    <div className={`risk-pill risk-${risk.severity.toLowerCase()}`}>{risk.severity}</div>
+                  </div>
+                  <p>{risk.warning}</p>
+                  <strong>{risk.fix}</strong>
+                </article>
+              ))}
+            </div>
+          </article>
+
+          <article className={`panel two-column-panel ${revealClass('up')}`} data-reveal>
+            <div>
+              <div className="section-head">
+                <p className="eyebrow">Coach Notes</p>
+                <ScatterText as="h2" groupSize={2} text="Why this feels smarter than a to-do app" />
+              </div>
+
+              <ul className="checklist">
+                {deferredPlan.coachTips.map((tip) => (
+                  <li key={tip}>{tip}</li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <div className="section-head">
+                <p className="eyebrow">Demo Script</p>
+                <ScatterText as="h2" groupSize={2} text="How to explain it fast" />
+              </div>
+
               <ol className="script-list">
-                {demoScript.map((line) => (
+                {deferredPlan.demoScript.map((line) => (
                   <li key={line}>{line}</li>
                 ))}
               </ol>
-            </article>
-          </div>
-        </section>
+            </div>
+          </article>
 
-        <section className={stagePanelClass('panel panel-wide footer-cta', 'submission')} data-stage="submission">
-          <div className="cta-band">
-            <div className="cta-copy">
-              <p className="eyebrow">Final Push</p>
-              <h2>Ship the cleanest version, then record the demo.</h2>
-              <p>
-                The strongest submission is not the most complex one. It is the version that
-                looks intentional, works reliably, and shows clear value in under a minute.
-              </p>
-            </div>
-            <div className="cta-actions">
-              <a className="primary-link" href="#planner">
-                Refine Plan
-              </a>
-              <a
-                className="secondary-link"
-                href="https://github.com/aniket01jan2008-svg/smart-student-copilot"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Open GitHub Repo
-              </a>
-            </div>
-          </div>
         </section>
       </main>
     </div>

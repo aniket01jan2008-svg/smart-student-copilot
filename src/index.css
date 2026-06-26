@@ -1,29 +1,30 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap');
+
 :root {
-  --background: #06080b;
-  --surface: #0f1318;
-  --heading: #f5f7fb;
-  --text: #cbd4e2;
-  --muted: #8d98ab;
-  --accent: #be1028;
-  --accent-soft: #ff536d;
+  --bg: #f6f2ea;
+  --bg-soft: #efe9df;
+  --panel: #f8f3eb;
+  --heading: #0b1e27;
+  --text: #1d3641;
+  --muted: #486372;
+  --line: rgba(11, 30, 39, 0.16);
+  --primary: #1fb8a0;
+  --primary-soft: #136e63;
+  --accent: #f06f38;
+  --danger: #d74f4f;
   --display: 'Sora', 'Segoe UI', sans-serif;
-  --display-cinematic: 'Bebas Neue', Impact, sans-serif;
   --sans: 'Manrope', 'Segoe UI', sans-serif;
   --mono: 'IBM Plex Mono', Consolas, monospace;
-  --page-progress: 0;
-  --hero-shift: 0px;
-  --hero-tilt: 0deg;
-  --scene-lift: 0px;
 
   font-family: var(--sans);
-  line-height: 1.55;
+  line-height: 1.6;
   font-weight: 400;
   color: var(--text);
   background:
-    radial-gradient(circle at 18% 10%, rgba(190, 16, 40, 0.16), transparent 24%),
-    radial-gradient(circle at 82% 18%, rgba(121, 18, 32, 0.12), transparent 22%),
-    radial-gradient(circle at 52% 100%, rgba(255, 83, 109, 0.08), transparent 20%),
-    linear-gradient(180deg, #08090b 0%, #030304 100%);
+    radial-gradient(circle at 12% 12%, rgba(31, 184, 160, 0.1), transparent 24%),
+    radial-gradient(circle at 88% 10%, rgba(240, 111, 56, 0.09), transparent 26%),
+    radial-gradient(circle at 52% 44%, rgba(255, 255, 255, 0.7), transparent 34%),
+    linear-gradient(180deg, #f7f3ec 0%, #efe7dc 100%);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -49,37 +50,38 @@ a {
 
 button,
 input,
-textarea {
+textarea,
+select {
   font: inherit;
 }
 
 #root {
-  width: min(1320px, calc(100% - 1.5rem));
+  width: min(1360px, calc(100% - 1.5rem));
   margin: 0 auto;
-  padding: 1rem 0 2.5rem;
+  padding: 1rem 0 2rem;
 }
 
 h1,
 h2,
 h3 {
-  font-family: var(--display);
-  line-height: 0.96;
+  margin: 0;
   color: var(--heading);
+  font-family: var(--display);
+  line-height: 1;
+  letter-spacing: -0.05em;
+  text-wrap: balance;
 }
 
 h1 {
-  font-size: clamp(3.2rem, 7vw, 6.3rem);
-  letter-spacing: -0.075em;
+  font-size: clamp(3rem, 6vw, 5.7rem);
 }
 
 h2 {
-  font-size: clamp(2rem, 3.5vw, 3.1rem);
-  letter-spacing: -0.055em;
+  font-size: clamp(1.9rem, 3vw, 3rem);
 }
 
 h3 {
-  font-size: 1.18rem;
-  letter-spacing: -0.03em;
+  font-size: 1.15rem;
 }
 
 p,
